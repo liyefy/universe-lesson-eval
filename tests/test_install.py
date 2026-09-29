@@ -47,7 +47,7 @@ class InstallTests(unittest.TestCase):
             (target / 'custom.txt').write_text('keep this', encoding='utf-8')
             result = install(project=project, update=True)
             backup = Path(result['backup'])
-            self.assertTrue(backup.is_relative_to(project / '.local/skill-backups'))
+            self.assertTrue(backup.is_relative_to((project / '.local/skill-backups').resolve()))
             self.assertEqual((backup / 'SKILL.md').read_text(encoding='utf-8'), 'local changes')
             self.assertEqual((backup / 'custom.txt').read_text(encoding='utf-8'), 'keep this')
             self.assertTrue((target / 'scripts/doctor.py').is_file())
@@ -88,10 +88,10 @@ class InstallTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             with patch.dict(os.environ, {'CODEX_HOME': str(Path(temp) / 'codex')}):
                 result = install()
-                self.assertEqual(Path(result['installed']), Path(temp) / 'codex/skills' / NAME)
+                self.assertEqual(Path(result['installed']), (Path(temp) / 'codex/skills' / NAME).resolve())
             custom = Path(temp) / 'other skills'
             result = install(dest=custom)
-            self.assertEqual(Path(result['installed']), custom / NAME)
+            self.assertEqual(Path(result['installed']), (custom / NAME).resolve())
 
     def test_missing_project_is_not_created(self):
         with tempfile.TemporaryDirectory() as temp:
