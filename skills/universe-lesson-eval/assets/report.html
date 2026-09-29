@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@@TITLE@@ · 验收报告</title>
+<style>
+:root{font-family:system-ui,"Microsoft YaHei",sans-serif;color:#172437;background:#f2f5fa;line-height:1.65}body{margin:0}main{max-width:1060px;margin:0 auto;padding:32px 20px 80px}header,article,details{background:white;border:1px solid #dce4ef;border-radius:14px;padding:24px;margin:20px 0}h1{font-size:26px;margin:0 0 8px}h2{font-size:20px}p{overflow-wrap:anywhere}.score{font-size:23px;font-weight:700;color:#193f75}.muted{color:#536477;font-size:14px}.severity{color:#9b421a;font-weight:600}button,select,textarea{font:inherit;border:1px solid #a9b9cd;border-radius:7px;padding:8px 12px}button{background:#194e85;color:white;cursor:pointer;margin:4px 8px 4px 0}label{display:block;margin-top:16px}textarea{display:block;box-sizing:border-box;width:100%;min-height:70px;background:#f9fbfe}select{margin-left:12px}img,video{display:block;max-width:100%;height:auto;border-radius:8px}audio{max-width:100%}figure{margin:20px 0}figcaption{color:#536477;font-size:14px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border-bottom:1px solid #e0e7ef;text-align:left;vertical-align:top;overflow-wrap:anywhere}code{overflow-wrap:anywhere}a{color:#174f8a}.toolbar{position:sticky;top:0;background:#f2f5fa;padding:12px 0;z-index:1}#save-status{display:block;font-size:13px;color:#465b71}.file-label{display:inline-block;margin:0}#import-file{max-width:260px}summary{cursor:pointer;font-weight:600}@media(max-width:600px){main{padding:12px}header,article,details{padding:16px}.score{font-size:19px}.toolbar{position:static}}
+</style></head><body><main>
+<header><p class="muted">NB宇宙 · @@SCOPE@@</p><h1>@@TITLE@@</h1><p class="score">@@SUMMARY@@</p><p>@@COVERAGE@@</p><ul>@@DIMENSIONS@@</ul>
+<p class="muted">未验证项不作为通过，暂计分不授予评级。批阅只记录处理决定，不修改验收事实、分数、源码或飞书数据。</p></header>
+<div class="toolbar"><button id="export-decisions" type="button">导出批阅 JSON</button><label class="file-label">导入批阅 JSON <input id="import-file" type="file" accept="application/json,.json"></label><span id="save-status" role="status">批阅尚未修改。</span></div>
+@@CARDS@@
+<details><summary>完整检查记录</summary><table><thead><tr><th>检查项</th><th>结论</th><th>说明与证据</th></tr></thead><tbody>@@ROWS@@</tbody></table></details>
+</main><script id="review-data" type="application/json">@@DATA@@</script><script>@@SCRIPT@@</script></body></html>

@@ -1,0 +1,50 @@
+---
+name: universe-lesson-eval
+description: 为 NB宇宙专题做逐节点验收、证据记录与量化评分。先用静态检查和真实浏览器断言覆盖确定性要求，再用聚焦模型判断处理科学语义、教学逻辑与感知效果；用于专题效果验收、文案音画核对和局部复验，支持音频后置阶段。
+---
+
+# NB宇宙专题验收
+
+交付可追溯的覆盖明细、去重缺陷、机器计算的分数及可批阅报告。验收本身不修改产品、需求或音频；不因一个缺陷停止其余检查。
+
+## 执行路径
+
+1. 读 [项目接入与依赖](references/project-setup.md)，分别定位技能和课程项目；再读 [准备与依据](references/prepare.md)，按项目规则登记任务，确认专题、来源版本、制作阶段、实际构建与范围。
+2. 从来源建立节点清单，为每项冻结规则、适用范围、预期和证据。新验收采用 v2；计划结构、命令和工具见 [automation.md](references/automation.md)。
+3. 按下表选择最小充分的检查方式，先完成确定性检查。读 [代码核对](references/code-checks.md)；涉及实际页面时再读 [黑箱验收](references/blackbox.md)。
+4. 仅为不能确定性判断的语义或感知问题使用模型，并记录 `model_reason`。任务较大或需要独立复核时按 [delegation.md](references/delegation.md) 分发小任务包；不固定为每个维度创建代理。
+5. 按 [labels.md](references/labels.md) 复核候选问题、去重并交工具计算覆盖与评分。确定性问题可用独立重跑确认；含模型判断的问题须由不同执行者复核。
+6. 按 [finish.md](references/finish.md) 生成报告、保存批阅决策并完成日志。需要登记飞书时再读 [feishu.md](references/feishu.md)，遵守本次实际授权；技能开发、试跑或仅本地任务不写远端。
+
+## 检查路由
+
+| engine | 适用命题 | 所需证据 |
+| --- | --- | --- |
+| `static` | 字符差异、集合/配置、可执行逻辑、导入和生命周期约束等确定性事实 | `code`，保存真实命令与断言记录 |
+| `browser` | 通过公开 UI 可确定判断的状态、文本、计数、点击响应、几何边界等 | `code + blackbox`，自动化执行记录及实际页面观察 |
+| `model` | 科学含义、论证充分性、必要文字、视觉协调、真实听音等无法由既有断言充分判断的项 | `analysis` 和/或 `blackbox`；不能只凭 `code` 得出语义结论 |
+
+浏览器自动化也是代码优先的检查方式，不必再让模型重复判断已闭合的断言。静态通过只证明其命题，不能替代页面效果；一个规则含不同命题时拆成不同 case。
+
+## 按需读取
+
+只加载当前任务所需资料，原始证据留在文件中。
+
+| 检查领域 | 资料 |
+| --- | --- |
+| 文案来源、科学概念、学习结果溯源 | [content.md](references/content.md) |
+| 任务进度、操作反馈、容差、练习整轮 | [interaction.md](references/interaction.md) |
+| 全量假设、充分论证与揭示门禁 | [hypotheses.md](references/hypotheses.md) |
+| 文案与场景、媒体同步、生命周期 | [motion.md](references/motion.md) |
+| 画布满铺、避让、安全边界、单层排版与素材一致 | [viewport.md](references/viewport.md) |
+| 工具、计划、证据封装与结果合并 | [automation.md](references/automation.md) |
+| 状态、去重、复核与评分 | [labels.md](references/labels.md) |
+| 报告、图片、定位与持久化批阅 | [finish.md](references/finish.md) |
+
+## 证据边界
+
+- 每个冻结 case 都保留结果；未执行、缺环境或来源争议写 `unverified`，不从未改动代码、旧报告或文件存在性推断通过。
+- 音频按流程最后添加。尚未进入音频阶段的声音与实播同步项按冻结依据记 `not_applicable`；文案、动画及应成立的操作仍检查。已启用或明确要求验音时，真实听音不可由字幕、媒体时钟或事件日志代替。
+- 默认全专题覆盖五个维度，首要视口为 1024×768；其他尺寸按需求和已确认范围冻结。局部复验使用 `coverage:focused`，不得表述为全课认证。
+- 分数、覆盖完整性和严重问题分别报告。v2 分数由工具计算；全部未验证时不评分，部分已验时可给暂定分，存在未验证项就不评级。等级不代表发布授权。v1 仅用于兼容旧报告，不具有 v2 的评分与证据保证。
+- 输出默认置于 `.local/universe-evals/<任务ID>/`。共享浏览器串行使用，子代理不接收完整会话或无关实现。

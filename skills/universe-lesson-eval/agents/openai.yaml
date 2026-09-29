@@ -1,0 +1,4 @@
+interface:
+  display_name: "NB宇宙专题验收"
+  short_description: "确定性检查优先，聚焦语义与感知判断，生成可追溯的覆盖、评分与批阅报告"
+  default_prompt: "使用 $universe-lesson-eval 验收指定专题，先冻结依据并执行确定性检查，再补充必要的语义、视觉和听音判断，生成含覆盖范围与评分的可批阅报告。"
