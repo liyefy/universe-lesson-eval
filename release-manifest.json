@@ -46,7 +46,7 @@
     "skills/universe-lesson-eval/tests/test_portability.py": "13f33b8eac3d51c198f653883d28420cc0f50b8aa6a07642c7207c4d59c5baca",
     "skills/universe-lesson-eval/tests/test_runner.py": "9e287e606bb741a409909821360725a5f6e052073c101ff26ef8d1a891693ed7",
     "skills/universe-lesson-eval/tests/test_v2_gate.py": "b8f722868df26d35e3c161f89f82f66a22dabfed07eb3aed450618729e779325",
-    "skills/universe-lesson-eval/tests/test_workflow.py": "52484e59765fb75df2c09aa23785028fcc34ff3fe6851c93349cf2515ceb7eb5",
+    "skills/universe-lesson-eval/tests/test_workflow.py": "5a1cc46ef7811b302e829969c94d60ea8dc745f6d1f5cb7e9302e90f894ffd12",
     "tests/test_install.py": "fbc4add151a0791d9a2f2c79e0e4bbfdf1051f4c77f02e59360970363557cec4",
     "tests/test_release.py": "b8fce978210893f475d8d70348696387eb8be36740a0791430481b43ed1d9c82"
   }

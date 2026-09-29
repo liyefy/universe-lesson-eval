@@ -180,7 +180,7 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn(tag, html)
             self.assertIn("media%20sample", html)
             self.assertIn("&lt;screenshot&gt;", html)
-            self.assertIn(self.root.as_posix(), markdown)
+            self.assertIn(self.root.resolve().as_posix(), markdown)
 
     def exportable_issue(self):
         issue = add_v2_issue(self.root, self.plan, self.report)
