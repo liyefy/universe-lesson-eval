@@ -93,6 +93,10 @@ python -B -X utf8 .agents/skills/universe-lesson-eval/scripts/doctor.py --projec
 
 报告默认存放在课程项目 `.local/universe-evals/<任务ID>/`。报告可能包含源文、页面地址、截图和本机路径，**不会随技能发布**；如需共享实际报告，另行检查内容和授权。HTML 批阅不触发课程修改或远端写入。
 
+报告中选择“确认修改/忽略/暂缓”并填写备注后，点击 **“复制给 AI 执行”**，再粘贴到能读取本机项目文件的 AI 对话。指令包含项目、报告和证据入口的绝对路径、报告哈希及点击时的完整批阅；AI 只接续“确认修改”的问题，没有确认项时先解读报告。无需先下载批阅 JSON，复制权限不可用时可在“查看给 AI 的完整指令”中手动复制。
+
+渲染报告时用 `render_report.py --project "课程项目根目录"` 指明目标项目，其他必填参数见工具说明；省略时使用当前工作目录。跨电脑或纯网页 AI 不能仅凭绝对路径读取本机文件，需要另行提供材料。旧 HTML 不会自动升级，请保留原报告并渲染到新目录。
+
 ## 更新与备份
 
 在独立技能仓库中更新，再重新安装：
@@ -117,3 +121,5 @@ python -B -X utf8 -m unittest discover -s skills/universe-lesson-eval/tests -v
 `release-manifest.json` 是明确的发布文件清单和 SHA-256；新增文件须先审阅并加入清单。修改现有文件后运行 `python -B -X utf8 scripts/check_release.py --refresh` 更新哈希，再运行上述验证。脱敏检查覆盖个人路径、内部飞书地址、常见凭据和未经审阅的 URL；它是辅助检查，不能证明任意文本绝无敏感信息，发布前仍需审阅差异。
 
 GitHub Actions 配置在 Windows/Linux、Python 3.11/3.14 上运行上述检查。测试数据均为合成材料，测试通过只证明工具行为，不代表任何真实课程通过验收。
+
+复制指令的 JavaScript 回归测试另用 Node.js 20+；未安装 Node 时该项会明确跳过，其余 Python 工具仍可独立运行。CI 会检查 Node 可用，确保这一项实际执行。

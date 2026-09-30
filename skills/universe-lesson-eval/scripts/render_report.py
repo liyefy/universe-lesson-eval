@@ -54,7 +54,7 @@ def location(issue):
             f'<p>源码：<code>{escaped(target)}</code> {escaped(extra)}</p>')
 
 
-def render(plan_path, report_path, lock_path, output_dir, decisions_path=None):
+def render(plan_path, report_path, lock_path, output_dir, decisions_path=None, project_root=None):
     checked = validate(plan_path, report_path, lock_path)
     require(checked["valid"], "report gate rejected: " + "; ".join(checked["errors"]))
     report, plan = read_json(report_path), read_json(plan_path)
@@ -62,6 +62,8 @@ def render(plan_path, report_path, lock_path, output_dir, decisions_path=None):
     decisions = (validate_decisions(report_path, read_json(decisions_path)) if decisions_path
                  else initial_decisions(report_path))
     out, report_root = Path(output_dir).resolve(), Path(report_path).resolve().parent
+    project = Path(project_root).expanduser().resolve() if project_root is not None else Path.cwd().resolve()
+    require(project.is_dir(), "project root must be an existing directory")
     names = ["report.md", "report.html", "gate-result.json", "review-decisions.json"]
     require(all(not (out / name).exists() for name in names), "report output exists; choose a fresh directory")
     score, counts = checked["score"], checked["counts"]
@@ -145,10 +147,23 @@ def render(plan_path, report_path, lock_path, output_dir, decisions_path=None):
         evidence_links = " ".join(media(e, report_root, out)[1] for e in row["evidence"])
         table.append(f'<tr><td>{escaped(label)}</td><td>{STATUS[row["status"]]}</td><td>{escaped(row["reason"])} {evidence_links}</td></tr>')
     assets = Path(__file__).resolve().parents[1] / "assets"
+    handoff = {"version": 1, "audit_id": decisions["audit_id"],
+               "plan_sha256": decisions["plan_sha256"], "report_sha256": decisions["report_sha256"],
+               "topic": title, "build_id": plan["scope"]["build_id"], "paths": {
+                   "project_root": project.as_posix(), "skill_root": assets.parent.as_posix(),
+                   "plan": Path(plan_path).resolve().as_posix(), "report": Path(report_path).resolve().as_posix(),
+                   "lock": Path(lock_path).resolve().as_posix(), "markdown": (out / "report.md").as_posix(),
+                   "html": (out / "report.html").as_posix()}}
+    md.extend(["", "## 交给 AI 继续处理", "",
+               f"打开 [可批阅报告](<{(out / 'report.html').as_posix()}>)，选择处理决定后点击“复制给 AI 执行”。",
+               "复制内容包含绝对路径和点击时的完整批阅快照；仅确认修改项进入修复范围。",
+               "同机且能读取项目文件的 AI 可直接接续；另一台电脑或纯网页 AI 需要另行提供文件。",
+               "浏览器中的最新批阅不会自动改写本 Markdown 或初始 review-decisions.json。", ""])
     template = (assets / "report.html").read_text(encoding="utf-8")
     context = {"TITLE": escaped(title), "SUMMARY": escaped(summary), "SCOPE": escaped(scope),
                "COVERAGE": escaped(coverage), "DIMENSIONS": dimension_html, "CARDS": "".join(cards) or "<p>无已确认缺陷。</p>",
                "ROWS": "".join(table), "DATA": json.dumps(decisions, ensure_ascii=False).replace("<", "\\u003c"),
+               "HANDOFF": json.dumps(handoff, ensure_ascii=False).replace("<", "\\u003c"),
                "SCRIPT": (assets / "report.js").read_text(encoding="utf-8")}
     # Replace placeholders in one pass; untrusted report content is never interpreted as a template.
     import re
@@ -168,9 +183,10 @@ def main():
     for key in ("plan", "report", "lock", "output-dir"):
         parser.add_argument("--" + key, required=True)
     parser.add_argument("--decisions")
+    parser.add_argument("--project", help="actual course project root; defaults to the current working directory")
     args = parser.parse_args()
     try:
-        print(json.dumps(render(args.plan, args.report, args.lock, args.output_dir, args.decisions), ensure_ascii=False))
+        print(json.dumps(render(args.plan, args.report, args.lock, args.output_dir, args.decisions, args.project), ensure_ascii=False))
         return 0
     except (ValueError, TypeError, KeyError, OSError) as exc:
         print(f"STOP: {exc}")

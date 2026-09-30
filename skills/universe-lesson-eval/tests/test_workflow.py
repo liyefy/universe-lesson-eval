@@ -2,6 +2,9 @@
 import copy
 import json
 from pathlib import Path
+import re
+import shutil
+import subprocess
 import tempfile
 import unittest
 
@@ -172,6 +175,76 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("无适用评分项", html)
         self.assertIn("未验证（预算 30）", html)
         self.assertNotIn("科学与文案：30 / 30", html)
+
+    def handoff_context(self):
+        self.save()
+        result = render(self.root / "plan.json", self.root / "report.json", self.root / "lock.json",
+                        self.root / "rendered", project_root=self.root)
+        page = Path(result["html"]).read_text(encoding="utf-8")
+        return json.loads(re.search(r'<script id="handoff-data" type="application/json">(.*?)</script>', page).group(1))
+
+    def test_handoff_has_real_absolute_paths_and_exact_report_binding(self):
+        self.save()
+        before = sha256(self.root / "report.json")
+        context = self.handoff_context()
+        self.assertEqual(context["paths"]["project_root"], self.root.resolve().as_posix())
+        self.assertEqual(context["report_sha256"], before)
+        self.assertEqual(context["plan_sha256"], self.report["plan_sha256"])
+        for key, value in context["paths"].items():
+            self.assertTrue(Path(value).is_absolute(), key)
+            self.assertTrue(Path(value).exists(), key)
+        self.assertEqual(before, sha256(self.root / "report.json"))
+
+    def test_missing_project_stops_before_writing_report(self):
+        self.save()
+        output = self.root / "rendered"
+        with self.assertRaisesRegex(ValueError, "project root"):
+            render(self.root / "plan.json", self.root / "report.json", self.root / "lock.json", output,
+                   project_root=self.root / "absent")
+        self.assertFalse(output.exists())
+
+    def test_handoff_topic_cannot_break_out_of_json_script(self):
+        topic = '</script><script>synthetic_unsafe()</script>'
+        self.plan["scope"]["topic"] = topic
+        (self.root / "lock.json").unlink()
+        self.report = report_for_fixture(self.root, self.plan)
+        context = self.handoff_context()
+        self.assertEqual(context["topic"], topic)
+        page = (self.root / "rendered/report.html").read_text(encoding="utf-8")
+        self.assertNotIn(topic, page)
+
+    @unittest.skipUnless(shutil.which("node"), "optional JavaScript formatter regression needs Node")
+    def test_copied_task_round_trips_latest_mixed_decisions_and_notes(self):
+        self.add_cases(4)
+        for index in range(1, 5):
+            add_v2_issue(self.root, self.plan, self.report, case_ids=[f"c{index}"], issue_id=f"issue-{index}")
+        self.save()
+        context = self.handoff_context()
+        decisions = initial_decisions(self.root / "report.json")
+        for row, decision in zip(decisions["decisions"], ("approve", "ignore", "defer", "unreviewed")):
+            row.update(decision=decision, note='最新备注：保留原文\n引号 " 和 ``` 均为文本')
+        script = Path(__file__).resolve().parents[1] / "assets/report.js"
+        command = [shutil.which("node"), "-e", "const fs = require('node:fs'); "
+                   "const x = JSON.parse(fs.readFileSync(0, 'utf8')); "
+                   "const sandbox = {module: {exports: {}}}; "
+                   "require('node:vm').runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), sandbox); "
+                   "process.stdout.write(sandbox.module.exports.buildHandoff(x.context, x.decisions));", str(script)]
+        result = subprocess.run(command, input=json.dumps({"context": context, "decisions": decisions}),
+                                capture_output=True, text=True, encoding="utf-8", check=True)
+        blocks = re.findall(r'```json\n(.*?)\n```', result.stdout, re.S)
+        self.assertEqual(json.loads(blocks[0]), context)
+        self.assertEqual(validate_decisions(self.root / "report.json", json.loads(blocks[1])), decisions)
+        self.assertIn('["issue-1"]', result.stdout.splitlines()[0])
+        self.assertNotIn('issue-2', result.stdout.splitlines()[0])
+        decisions["decisions"][0]["decision"] = "defer"
+        no_approval = subprocess.run(command, input=json.dumps({"context": context, "decisions": decisions}),
+                                    capture_output=True, text=True, encoding="utf-8", check=True)
+        self.assertIn('本次不修改代码', no_approval.stdout.splitlines()[0])
+        decisions["report_sha256"] = '0' * 64
+        wrong = subprocess.run(command, input=json.dumps({"context": context, "decisions": decisions}),
+                               capture_output=True, text=True, encoding="utf-8")
+        self.assertNotEqual(wrong.returncode, 0)
+        self.assertEqual(wrong.stdout, '')
 
     def test_media_uses_images_and_players_without_inline_svg(self):
         for suffix, tag in ((".png", "<img"), (".webm", "<video"), (".mp3", "<audio"), (".svg", "<a ")):
