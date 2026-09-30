@@ -7,7 +7,7 @@
 | 用途 | 依赖 |
 | --- | --- |
 | 安装、计划、证据校验、评分与报告 | **Python 3.11+**，仅标准库，无需 `pip install` |
-| 下载和更新技能 | **Git**、本仓库的 GitHub 访问权限；当前为私有仓库 |
+| 下载和更新技能 | **Git**、可访问 GitHub 的网络；本仓库公开，下载与安装无需注册或登录 GitHub |
 | AI 执行验收 | 能读取本地文件、执行命令的 AI 宿主（如 Codex），以及课程项目源码和当前项目规则 |
 | 页面、截图、音视频验收 | 宿主可用的真实浏览器/媒体工具，以及可访问的测试页面 |
 | 构建、lint、运行 NB宇宙 | 项目现有依赖；当前为 **Node.js 20.x + pnpm**，以项目 `package.json` 和 `AGENTS.md` 为准 |
@@ -22,7 +22,7 @@
 在**课程项目的 AI 对话**中复制下面整段，AI 会检查依赖、安装并自检；对话已有专题和测试入口时继续验收，否则在安装完成后提示补充。
 
 ```text
-请将 https://github.com/liyefy/nb-universe-skills 中的 universe-lesson-eval 安装到当前课程项目并使用。先确认项目根目录、读取项目规则，检查 Python 3.11+、Git 和仓库访问权限；复用已有克隆或克隆到课程项目之外，再用仓库的 scripts/install.py --project "实际项目根目录" 安装，已安装时使用 --update 保留备份，保护现有改动和 .local 私有配置。使用已有 GitHub 登录，不把凭据写进命令。安装后读取项目 .agents/skills/universe-lesson-eval/SKILL.md，并运行其中 scripts/doctor.py --project "实际项目根目录" --require-project。若本对话已经明确专题、测试入口和范围，继续用这个技能验收：先代码、再真实页面，模型只处理剩余判断；否则先完成安装，再提示我补充这些信息。生成本地 HTML 报告，展示实际采集的证据图片和可播放音视频，并提供报告绝对路径与“复制给 AI 执行”入口。本次只安装和验收，课程修复、飞书登记、音频生成和远端发布按后续明确授权处理。
+请将 https://github.com/liyefy/universe-lesson-eval 中的 universe-lesson-eval 安装到当前课程项目并使用。先确认项目根目录、读取项目规则，检查 Python 3.11+、Git 和仓库连通性；复用已有克隆或通过 HTTPS 匿名克隆到课程项目之外，再用仓库的 scripts/install.py --project "实际项目根目录" 安装，已安装时使用 --update 保留备份，保护现有改动和 .local 私有配置。该仓库公开，下载与安装无需 GitHub 账号或 Token。安装后读取项目 .agents/skills/universe-lesson-eval/SKILL.md，并运行其中 scripts/doctor.py --project "实际项目根目录" --require-project。若本对话已经明确专题、测试入口和范围，继续用这个技能验收：先代码、再真实页面，模型只处理剩余判断；否则先完成安装，再提示我补充这些信息。生成本地 HTML 报告，展示实际采集的证据图片和可播放音视频，并提供报告绝对路径与“复制给 AI 执行”入口。本次只安装和验收，课程修复、飞书登记、音频生成和远端发布按后续明确授权处理。
 ```
 
 ### 方式二：传统命令
@@ -30,8 +30,8 @@
 在课程项目之外克隆，替换下面的项目路径后运行：
 
 ```powershell
-git clone https://github.com/liyefy/nb-universe-skills.git
-cd nb-universe-skills
+git clone https://github.com/liyefy/universe-lesson-eval.git
+cd universe-lesson-eval
 python -B -X utf8 scripts/install.py --project "你的课程项目根目录"
 ```
 
