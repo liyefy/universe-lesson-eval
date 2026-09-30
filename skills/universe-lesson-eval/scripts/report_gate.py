@@ -116,6 +116,7 @@ def _validate_v1(plan_path, report_path, lock_path):
     except (ValueError, TypeError, KeyError, OSError) as exc:
         errors.append(str(exc))
     return {"legacy": True, "valid": not errors, "accepted": not errors and not blockers, "errors": errors,
+            "full_certification": False, "compatibility": "v1 legacy acceptance is not v2 visual coverage certification",
             "blocking_cases": blockers, "critical_blockers": critical, "counts": counts}
 
 

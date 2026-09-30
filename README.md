@@ -6,10 +6,11 @@
 
 | 用途 | 依赖 |
 | --- | --- |
-| 安装、计划、证据校验、评分与报告 | **Python 3.11+**，仅标准库，无需 `pip install` |
+| 安装、计划、证据校验、评分与报告 | **Python 3.11+**；核心工具与 PNG 测量仅用标准库，JPEG/WebP 像素复算另见下项 |
 | 下载和更新技能 | **Git**、可访问 GitHub 的网络；本仓库公开，下载与安装无需注册或登录 GitHub |
 | AI 执行验收 | 能读取本地文件、执行命令的 AI 宿主（如 Codex），以及课程项目源码和当前项目规则 |
 | 页面、截图、音视频验收 | 宿主可用的真实浏览器/媒体工具，以及可访问的测试页面 |
+| JPEG/WebP 截图像素测量（按需） | **Pillow**（`python -m pip install Pillow`）；PNG 测量仅用标准库，缺少解码器会标为未验证 |
 | 构建、lint、运行 NB宇宙 | 项目现有依赖；当前为 **Node.js 20.x + pnpm**，以项目 `package.json` 和 `AGENTS.md` 为准 |
 | 专项检查（按需） | 项目提供的 `r3f-best-practices`、`universe-responsive-ui`、`universe-lesson-tts`；飞书登记另需已授权的客户端或 writer |
 

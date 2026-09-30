@@ -39,8 +39,8 @@
 ## 冻结节点和检查路由
 
 1. 从来源盘点阶段、节点、假设及客观正误、操作要求、关键动作、题目反馈；已接音频时加入实际 cue。错误假设和干扰项按教学角色保留。
-2. 在 `inventory` 登记每节点的 `required_rules`；必要状态/设备矩阵可用 `required_variants:[{rule_id,state,viewport}]` 显式约束，不能靠标题暗示覆盖。
-3. 为每项写原文锚点、可观察预期、适用性和前置条件。默认 `coverage:full` 声明 science、interaction、motion、viewport、hypothesis 五维；明确局部任务用 `focused` 和对应子集。每个声明维度须有 case，可有依据地允许 N/A。
+2. 在 `inventory` 登记每节点的 `required_rules`。full 的课程来源同时保存从原始内容提取的 `node_ids`，与 inventory 逐项对应；每个节点声明 VIEW-01/02/03 的适用性或有依据的 N/A。全景、画中画、科学终态分别判断，不能只在某个探索节点查一次就代表提问和结论均已验。
+3. 为每项写原文锚点、可观察预期、适用性和前置条件。默认 `coverage:full` 声明 science、interaction、motion、viewport、hypothesis 五维；明确局部任务用 `focused` 和对应子集。按 [schema-v2.md](schema-v2.md) 冻结 `visual_states` 与 `scope.viewports`，面板开关、必要科学终态及过渡不能藏在标题里；其它领域仍可用 `required_variants` 约束。没有终态或过渡的节点写冻结依据，不人为创造动作。
 4. 先找确定性判据：静态事实用 `engine:static`；公开 UI 可自动断言的行为用 `browser`；只有语义或感知仍需裁决时才用 `model` 并写 `model_reason`。同一命题只分配一个主要维度，避免交叉章节重复扣分。
 5. 按 [工具契约](automation.md) 指定证据通道。含 blackbox 的 case 冻结实际状态、步骤、CSS 视口和观察方法；需要听音的与纯 DOM 门禁分开。没有来源的时差或容差阈值不自行补造。
 6. 用机器覆盖检查发现漏项；原始清单存在歧义或复杂论证时再做聚焦独立审阅。冻结后变更来源、范围、构建或预期，须新计划版本重新冻结并重取相关证据，不能事后改 lock 适配结果。

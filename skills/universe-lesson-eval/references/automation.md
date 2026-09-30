@@ -1,10 +1,10 @@
 # 自动化执行与工具入口
 
-新验收使用 [v2 契约](schema-v2.md)；评分标准见 [labels](labels.md)。工具仅用 Python 3.11+ 标准库，以下命令以项目内安装为例，在 PROJECT_ROOT 执行。全局安装时将 `.agents/skills/universe-lesson-eval` 替换为实际 SKILL_ROOT 的绝对路径，含空格时加引号；不要切到技能目录运行项目检查。定位方法见 [project-setup.md](project-setup.md)。所有输出拒绝覆盖，续跑使用新文件名；合成样例不得上传产品反馈。
+新验收使用 [v2 契约](schema-v2.md)；评分标准见 [labels](labels.md)。核心工具与 PNG 测量仅用 Python 3.11+ 标准库；JPEG/WebP 测量需要可选的 Pillow。以下命令以项目内安装为例，在 PROJECT_ROOT 执行。全局安装时将 `.agents/skills/universe-lesson-eval` 替换为实际 SKILL_ROOT 的绝对路径，含空格时加引号；不要切到技能目录运行项目检查。定位方法见 [project-setup.md](project-setup.md)。所有输出拒绝覆盖，续跑使用新文件名；合成样例不得上传产品反馈。
 
 ## 执行顺序
 
-1. 建立本次报告目录和 sources/，保存实际采用的规则、需求或底本文案快照。依据提取与规则适用性由主代理核对；工具不能从不完整清单推导出遗漏要求。
+1. 建立本次报告目录和 sources/，保存实际采用的规则、需求或底本文案快照。full 的来源节点清单、逐节点视觉适用性、状态和尺寸矩阵由门禁检查一致性；原文提取完整性仍由执行者核对，工具不能从不完整清单推导出遗漏要求。
 2. 为 case 选择 `static`、`browser` 或 `model`；能写可靠断言时用前两者。browser 是在真实页面运行代码断言，不等同模型看截图。只有无法确定性判断的项才填写 model_reason 并委派模型。
 3. 冻结计划，拆小任务包，先运行确定性检查，再补语义/感知证据。共享页面串行访问，脚本不会自动创建代理。
 4. 保存原始输出并封装证据。缺陷按独立问题归并；确定性项独立重跑，模型项由不同执行者复核。所有必要证据不足时保留 unverified。
@@ -42,6 +42,14 @@ python -X utf8 .agents/skills/universe-lesson-eval/scripts/run_check.py --plan P
 
 ## 合并与门禁
 
+对于满铺、避让及安全边距，将公开 UI 的原始几何回执与原始截图放在报告目录内，通过通用测量脚本校验。脚本不驱动浏览器，不能把离线分析说成一次实际页面操作：
+
+```powershell
+python -X utf8 SKILL_ROOT/scripts/run_check.py --plan PLAN.json --case-id CASE --executor ACTOR --out evidence/run.json --input PLAN.json --input evidence/measurement.json --input evidence/screen.png --input SKILL_ROOT/scripts/check_viewport.py -- python -X utf8 SKILL_ROOT/scripts/check_viewport.py --plan PLAN.json --case-id CASE --measurement evidence/measurement.json --screenshot evidence/screen.png
+```
+
+`SKILL_ROOT` 替换为技能真实路径；冻结阈值、原始观测字段、测量能力及限制见 [viewport.md](viewport.md)。捕获顺序为冻结计划 → 实页观测与截图 → run_check；截图和测量是两个实际输入，不手写冒充脚本的 stdout。
+
 每份 shard 提供 version=2、audit_id、plan_sha256、executor、results、issues。路径全部相对最终 REPORT.json 所在目录，不能相对 worker 分片位置。相同问题由主代理显式归并成一个 issue，多个失败 case 引用同一 issue_id；不要让每包各扣一次。
 
 ```powershell
@@ -52,6 +60,8 @@ python -X utf8 .agents/skills/universe-lesson-eval/scripts/report_gate.py check 
 重复/额外结果、跨版本分片和重复 issue 均拒绝。默认缺项拒绝合并；只有显式 `--allow-incomplete` 才将未交付 case 填为“未收到执行结果”的 unverified，不补通过。门禁无效的合并产物保留供诊断，修订使用新文件。
 
 v2 退出码：0=报告有效且适用项均已检查（可以有已确认缺陷）；1=报告有效但有未验证；2=契约/证据无效。分别查看 valid、complete、coverage、score、hard_findings，退出 0 不代表无缺陷或授权发布。v1 保留原 accepted/退出码语义，仅用于读取旧报告，不作为新版完整验收。
+
+新版 full 还必须满足视觉契约；旧 v2 计划缺少该契约时保留原文件并拒绝继承旧成绩。原始结果中的证据缺口通过 `derived_results` 和 `diagnostics` 展示，未验证不评级；`full_certification` 只有在完整整课范围、实际验收完成且没有失败项时才成立，focused 永远不具有整课认证。
 
 PowerShell 的外层工具有时把所有非零原生命令映射成退出1；需区分时读取命令后的 `$LASTEXITCODE`，或在单命令调用末尾显式 `exit $LASTEXITCODE`。记录原始脚本码，不把外层返回码误报成 gate 契约。
 

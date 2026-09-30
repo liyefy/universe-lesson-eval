@@ -67,7 +67,8 @@ def render(plan_path, report_path, lock_path, output_dir, decisions_path=None, p
     names = ["report.md", "report.html", "gate-result.json", "review-decisions.json"]
     require(all(not (out / name).exists() for name in names), "report output exists; choose a fresh directory")
     score, counts = checked["score"], checked["counts"]
-    scope = "整课范围" if plan["scope"]["coverage"] == "full" else "指定局部范围"
+    scope = ("整课范围 · " + ("完整认证通过" if checked["full_certification"] else "未通过完整认证")
+             if plan["scope"]["coverage"] == "full" else "指定局部范围 · 不构成整课认证")
     score_label = (("暂无可评分证据" if score["provisional"] else "无适用评分项")
                    if score["value"] is None else f"{'暂计 ' if score['provisional'] else ''}{score['value']} / 100")
     grade = score.get("grade") or "未评级"
@@ -93,6 +94,7 @@ def render(plan_path, report_path, lock_path, output_dir, decisions_path=None, p
             f' · 原始扣分 {escaped(data["raw_deduction"])}，实际扣分 {escaped(data["applied_deduction"])}</li>')
     dimension_html = "".join(dimension_items)
     rows = indexed(report["results"], "results")
+    derived_rows = indexed(checked["derived_results"], "derived results")
     case_map = indexed(plan["cases"], "cases")
     deductions = {item["issue_id"]: item for item in score["deductions"]}
     decision_map = {row["issue_id"]: row for row in decisions["decisions"]}
@@ -142,10 +144,14 @@ def render(plan_path, report_path, lock_path, output_dir, decisions_path=None, p
     md.extend(["", "## 完整检查记录", "", "| 检查 | 结论 | 说明 |", "| --- | --- | --- |"])
     table = []
     for row in report["results"]:
+        derived = derived_rows[row["id"]]
+        reason = derived["reason"]
+        if derived["reported_status"] != derived["status"]:
+            reason += f"；原始声明：{STATUS[row['status']]}，原始说明：{row['reason']}"
         label = f"{row['id']} · {case_map[row['id']]['title']}"
-        md.append(f"| {md_text(label)} | {STATUS[row['status']]} | {md_text(row['reason'])} |")
+        md.append(f"| {md_text(label)} | {STATUS[derived['status']]} | {md_text(reason)} |")
         evidence_links = " ".join(media(e, report_root, out)[1] for e in row["evidence"])
-        table.append(f'<tr><td>{escaped(label)}</td><td>{STATUS[row["status"]]}</td><td>{escaped(row["reason"])} {evidence_links}</td></tr>')
+        table.append(f'<tr><td>{escaped(label)}</td><td>{STATUS[derived["status"]]}</td><td>{escaped(reason)} {evidence_links}</td></tr>')
     assets = Path(__file__).resolve().parents[1] / "assets"
     handoff = {"version": 1, "audit_id": decisions["audit_id"],
                "plan_sha256": decisions["plan_sha256"], "report_sha256": decisions["report_sha256"],

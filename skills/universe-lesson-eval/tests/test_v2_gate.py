@@ -326,7 +326,10 @@ class V2GateTests(unittest.TestCase):
             evidence[field] = old
         self.report["results"][0]["status"] = "pass"
         self.report["results"][0]["evidence"].pop()
-        self.assertFalse(self.check()["valid"])
+        checked = self.check()
+        self.assertTrue(checked["valid"])
+        self.assertFalse(checked["complete"])
+        self.assertEqual(checked["derived_results"][0]["status"], "unverified")
         self.report["results"][0]["status"] = "unverified"
         self.assertTrue(self.check()["valid"])
 
@@ -339,9 +342,14 @@ class V2GateTests(unittest.TestCase):
     def test_missing_artifact_or_required_evidence_is_not_a_pass(self):
         evidence = self.report["results"][0]["evidence"][0]
         (self.root / evidence["path"]).unlink()
-        self.assertFalse(self.check()["valid"])
+        checked = self.check()
+        self.assertTrue(checked["valid"])
+        self.assertFalse(checked["complete"])
+        self.assertIsNone(checked["score"]["grade"])
+        self.assertEqual(checked["derived_results"][0]["reported_status"], "pass")
+        self.assertEqual(checked["derived_results"][0]["status"], "unverified")
         self.report["results"][0]["evidence"] = []
-        self.assertFalse(self.check()["valid"])
+        self.assertEqual(self.check()["counts"]["unverified"], 1)
 
     def test_code_inputs_and_stdin_text_require_valid_hashes(self):
         evidence = self.report["results"][0]["evidence"][0]
@@ -361,7 +369,10 @@ class V2GateTests(unittest.TestCase):
         record.update(outcome="timeout", exit_code=None)
         write_json(artifact, record)
         evidence["sha256"] = sha256(artifact)
-        self.assertFalse(self.check()["valid"])
+        checked = self.check()
+        self.assertTrue(checked["valid"])
+        self.assertEqual(checked["counts"]["unverified"], 1)
+        self.assertIsNone(checked["score"]["grade"])
         self.report["results"][0]["status"] = "unverified"
         self.assertTrue(self.check()["valid"])
 
