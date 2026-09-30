@@ -4,7 +4,7 @@
     ".gitattributes": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
     ".github/workflows/check.yml": "91f8415fe0961b46af44af51a7b7c60316211f0500d8759a2091a37cae4fe2bd",
     ".gitignore": "eac4105c6954153cf6581af2ee62a655a5665111dda0c6696c39bda637b74c54",
-    "README.md": "574ab543eda102b919439d66e0e07d0e4d363c6e27e32ad88621b368b2721a0b",
+    "README.md": "a8f326b1cbe6db38304b60223ca5331d884aec22f29d8054b641e577dd4fbe8f",
     "scripts/check_release.py": "30afcbc3fe633483d3da4ae13640f8cad808155a1617ad04ecb620b20e90945b",
     "scripts/install.py": "a6a5720add4b66848c7e3f5b86cf5516bac76502999bfe850a74f85ba7477fed",
     "skills/universe-lesson-eval/SKILL.md": "f3fa5f8262b2f79b41e859fa04ffdc2059a566f0c02b5d9499ebd3548e8aa7e1",
